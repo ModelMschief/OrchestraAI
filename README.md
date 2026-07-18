@@ -1,7 +1,6 @@
 <div align="center">
 
-# 🚀 Crestodian
-
+# OrchestraAI
 ### Build AI Agents. Not AI Infrastructure.
 
 *A cloud-native AI Agent Runtime Platform that abstracts memory, knowledge, reasoning, tools, execution, and model orchestration behind a unified developer API.*
