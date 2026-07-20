@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OrchestraAI Runtime Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section class="auth-shell" id="auth-shell">
+    <div class="auth-card">
+      <div class="auth-copy">
+        <p class="eyebrow">OrchestraAI / Developer Access</p>
+        <h1>Sign in to your own agent runtime.</h1>
+        <p class="hero-text">
+          Every developer gets an isolated workspace for providers, agents, documents, knowledge graphs, and chat history.
+        </p>
+        <p class="system-banner" id="auth-banner">Create an account or log in to start building your own OrchestraAI workspace.</p>
+      </div>
+      <div class="auth-panels">
+        <article class="panel-card form-card">
+          <div class="panel-header">
+            <h3>Sign Up</h3>
+            <span class="mono">new developer</span>
+          </div>
+          <form id="signup-form" class="stack-form">
+            <label>
+              Name
+              <input type="text" name="name" placeholder="Your name" required>
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" placeholder="you@example.com" required>
+            </label>
+            <label>
+              Password
+              <input type="password" name="password" placeholder="At least 8 characters" required>
+            </label>
+            <button class="primary-action" type="submit">Create Account</button>
+          </form>
+        </article>
+
+        <article class="panel-card form-card">
+          <div class="panel-header">
+            <h3>Log In</h3>
+            <span class="mono">existing developer</span>
+          </div>
+          <form id="login-form" class="stack-form">
+            <label>
+              Email
+              <input type="email" name="email" placeholder="you@example.com" required>
+            </label>
+            <label>
+              Password
+              <input type="password" name="password" placeholder="Your password" required>
+            </label>
+            <button class="secondary-action auth-submit" type="submit">Log In</button>
+          </form>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-shell hidden" id="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">OrchestraAI / Runtime Console</p>
+        <h1>Build agents, not the plumbing behind them.</h1>
+        <p class="hero-text">
+          OrchestraAI turns provider validation, document learning, agent isolation, retrieval,
+          web grounding, and optimization into one reusable runtime layer for AI applications.
+        </p>
+        <p class="system-banner" id="system-banner">Backend connected. Loading runtime state...</p>
+        <div class="hero-actions">
+          <button class="primary-action" data-tab-target="overview">Open Console</button>
+          <button class="secondary-action" data-tab-target="agents">Work With Agents</button>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="signal-card">
+          <span class="signal-label">Runtime Snapshot</span>
+          <strong id="hero-providers">0 providers online</strong>
+          <p id="hero-summary">Add a provider key, create an agent, and start the learning pipeline.</p>
+        </div>
+        <div class="mini-grid">
+          <article>
+            <span>Knowledge docs</span>
+            <strong id="hero-documents">0</strong>
+          </article>
+          <article>
+            <span>Graph nodes</span>
+            <strong id="hero-entities">0</strong>
+          </article>
+          <article>
+            <span>Active agents</span>
+            <strong id="hero-agents">0</strong>
+          </article>
+          <article>
+            <span>Messages logged</span>
+            <strong id="hero-messages">0</strong>
+          </article>
+        </div>
+      </div>
+    </header>
+
+    <main class="console">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">OA</div>
+          <div>
+            <strong>OrchestraAI</strong>
+            <p>Hackathon MVP</p>
+          </div>
+        </div>
+
+        <section class="sidebar-user">
+          <span class="sidebar-label">Developer Session</span>
+          <strong id="user-name">Not signed in</strong>
+          <p id="user-email">Authenticate to load your workspace.</p>
+          <div style="margin-top: 16px; margin-bottom: 16px;">
+            <span class="sidebar-label" style="display: block; margin-bottom: 4px;">Platform API Key</span>
+            <code id="user-api-key" style="display: block; padding: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; word-break: break-all; font-size: 11px;">Not generated yet</code>
+          </div>
+          <button class="secondary-action slim" id="logout-button" type="button">Log Out</button>
+        </section>
+
+        <nav class="nav-list" aria-label="Primary">
+          <button class="nav-item is-active" data-tab="overview">Overview</button>
+          <button class="nav-item" data-tab="providers">Providers</button>
+          <button class="nav-item" data-tab="agents">Agents</button>
+          <button class="nav-item" data-tab="knowledge">Knowledge</button>
+          <button class="nav-item" data-tab="runtime">Runtime</button>
+          <button class="nav-item" data-tab="usage">Usage</button>
+        </nav>
+
+        <section class="sidebar-note">
+          <span class="sidebar-label">Scope</span>
+          <p>FastAPI backend, SQLite, multi-user auth, local vector search, lightweight graph extraction, and grounded multi-provider chat.</p>
+        </section>
+      </aside>
+
+      <section class="content">
+        <section class="tab-panel is-active" id="overview">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Platform Overview</p>
+              <h2>Single control plane for every agent.</h2>
+            </div>
+            <span class="status-pill success" id="overview-status">System healthy</span>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <span>Connected providers</span>
+              <strong id="overview-providers">0</strong>
+              <p>Validated keys are profiled for routing, fallback, and safe usage.</p>
+            </article>
+            <article class="stat-card">
+              <span>Active agents</span>
+              <strong id="overview-agents">0</strong>
+              <p>Each agent keeps isolated documents, chunks, graph data, and chat history.</p>
+            </article>
+            <article class="stat-card">
+              <span>Indexed chunks</span>
+              <strong id="overview-chunks">0</strong>
+              <p>Uploaded documents are chunked, embedded locally, and indexed for retrieval.</p>
+            </article>
+            <article class="stat-card">
+              <span>Knowledge entities</span>
+              <strong id="overview-entities">0</strong>
+              <p>Lightweight relationships are extracted to shape more grounded retrieval.</p>
+            </article>
+          </div>
+
+          <div class="split-layout">
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Latest Runtime Flow</h3>
+                <span class="mono" id="runtime-trace-id">No request yet</span>
+              </div>
+              <ol class="timeline" id="overview-runtime-flow">
+                <li>
+                  <strong>Waiting for first request</strong>
+                  <p>Create an agent, upload documents, and chat to generate a live runtime trace.</p>
+                </li>
+              </ol>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Agent Fleet</h3>
+                <span class="status-pill warning" id="fleet-note">No agents selected</span>
+              </div>
+              <div class="agent-list compact" id="overview-agent-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="providers">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Provider Console</p>
+              <h2>Validate keys and record model capabilities.</h2>
+            </div>
+            <span class="status-pill success">OpenAI + Gemini + Groq</span>
+          </div>
+
+          <article class="panel-card form-card">
+            <div class="panel-header">
+              <h3>Add Provider Key</h3>
+              <span class="mono">validation handshake</span>
+            </div>
+            <form id="provider-form" class="stack-form">
+              <div class="form-grid">
+                <label>
+                  Provider
+                  <select name="provider_type">
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Gemini</option>
+                    <option value="groq">Groq</option>
+                  </select>
+                </label>
+                <label>
+                  Model override
+                  <input type="text" name="default_model" placeholder="Optional, otherwise OrchestraAI auto-selects">
+                </label>
+              </div>
+              <label>
+                API key
+                <input type="password" name="api_key" placeholder="Paste the provider key here" required>
+              </label>
+              <div class="helper-row">
+                <button class="primary-action slim" type="submit">Validate & Save</button>
+                <p class="inline-note" id="provider-status">Keys are validated live and OrchestraAI auto-selects a model unless you override it.</p>
+              </div>
+            </form>
+          </article>
+
+          <div class="provider-grid" id="provider-grid"></div>
+
+          <article class="panel-card">
+            <div class="panel-header">
+              <h3>Validation Rules</h3>
+              <span class="mono">provider_registry</span>
+            </div>
+            <div class="rule-grid">
+              <div>
+                <strong>Key check</strong>
+                <p>OpenAI uses the models list endpoint and Gemini uses the models API to confirm the key works.</p>
+              </div>
+              <div>
+                <strong>Capability profile</strong>
+                <p>Each provider stores models, status, and a lightweight capability summary for routing decisions.</p>
+              </div>
+              <div>
+                <strong>Routing preference</strong>
+                <p>Gemini is favored for fast web synthesis and OpenAI is favored for final answer quality by default.</p>
+              </div>
+              <div>
+                <strong>Fallback safety</strong>
+                <p>Invalid keys are saved with error state instead of being used silently in runtime requests.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="tab-panel" id="agents">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Agent Studio</p>
+              <h2>Operate multiple isolated agents per user.</h2>
+            </div>
+            <span class="status-pill success" id="selected-agent-pill">No agent selected</span>
+          </div>
+
+          <article class="panel-card form-card">
+            <div class="panel-header">
+              <h3>Create New Agent</h3>
+              <span class="mono">isolated runtime scope</span>
+            </div>
+            <form id="agent-form" class="stack-form">
+              <div class="form-grid">
+                <label>
+                  Agent name
+                  <input type="text" name="name" placeholder="Research Copilot" required>
+                </label>
+                <label>
+                  Optimization mode
+                  <select name="optimization_mode">
+                    <option value="balanced">Balanced</option>
+                    <option value="latency-first">Latency-first</option>
+                    <option value="quality-first">Quality-first</option>
+                    <option value="cost-aware">Cost-aware</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Tagline
+                <input type="text" name="tagline" placeholder="What this agent is for">
+              </label>
+              <label>
+                System prompt
+                <textarea name="system_prompt" rows="4" placeholder="Define what this agent should optimize for"></textarea>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" name="allow_web_search" checked>
+                Allow web search when freshness or low-confidence retrieval requires it
+              </label>
+              <div class="helper-row">
+                <button class="primary-action slim" type="submit">Create Agent</button>
+                <p class="inline-note" id="agent-status-note">Agents never share documents, graph data, or message history.</p>
+              </div>
+            </form>
+          </article>
+
+          <div class="agents-layout">
+            <div class="agent-list" id="agent-list"></div>
+            <article class="panel-card agent-detail">
+              <div class="panel-header">
+                <h3 id="agent-name">Select an agent</h3>
+                <span class="status-pill success" id="agent-status">Idle</span>
+              </div>
+              <p class="agent-tagline" id="agent-tagline">Create or select an agent to load its isolated workspace.</p>
+              <p style="font-size: 12px; opacity: 0.7; margin-top: 4px; font-family: 'IBM Plex Mono', monospace;">Agent ID: <span id="agent-id-display">None</span></p>
+              <div class="detail-grid">
+                <div>
+                  <span class="detail-label">Connected providers</span>
+                  <p id="agent-providers">No providers yet</p>
+                </div>
+                <div>
+                  <span class="detail-label">Knowledge scope</span>
+                  <p id="agent-knowledge">0 documents / 0 chunks</p>
+                </div>
+                <div>
+                  <span class="detail-label">Optimization mode</span>
+                  <p id="agent-optimization">Balanced</p>
+                </div>
+                <div>
+                  <span class="detail-label">Last 24h usage</span>
+                  <p id="agent-usage">0 messages</p>
+                </div>
+              </div>
+
+              <div class="config-panels">
+                <section>
+                  <h4>Prompt contract</h4>
+                  <p id="agent-contract">The runtime instructions will appear here.</p>
+                </section>
+                <section>
+                  <h4>Runtime tools</h4>
+                  <div class="chip-row" id="agent-tools"></div>
+                </section>
+                <section>
+                  <h4>Guardrails</h4>
+                  <div class="chip-row" id="agent-guardrails"></div>
+                </section>
+              </div>
+
+              <div class="config-panels">
+                <section>
+                  <h4>Document Learning</h4>
+                  <form id="document-form" class="stack-form">
+                    <label>
+                      Upload a file to the selected agent
+                      <input type="file" name="file" accept=".pdf,.docx,.txt,.md" required>
+                    </label>
+                    <div class="helper-row">
+                      <button class="secondary-action slim" type="submit">Run Learning Pipeline</button>
+                      <p class="inline-note" id="document-status">Files are parsed, chunked, embedded, and added to the graph.</p>
+                    </div>
+                  </form>
+                  <div class="document-list" id="agent-document-list"></div>
+                </section>
+
+                <section>
+                  <h4>Chat Runtime</h4>
+                  <div class="chat-thread" id="chat-thread"></div>
+                  <form id="chat-form" class="stack-form">
+                    <label>
+                      Ask the selected agent
+                      <textarea name="message" rows="4" placeholder="Ask a question about the uploaded knowledge or a current topic"></textarea>
+                    </label>
+                    <div class="helper-row">
+                      <button class="primary-action slim" type="submit">Run Chat Pipeline</button>
+                      <p class="inline-note" id="chat-status">The runtime retrieves local context first and only searches the web when needed.</p>
+                    </div>
+                  </form>
+                </section>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="knowledge">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Knowledge Pipeline</p>
+              <h2>Upload files, extract context, and map relationships.</h2>
+            </div>
+            <span class="status-pill success" id="knowledge-agent-label">No agent selected</span>
+          </div>
+
+          <div class="knowledge-grid">
+            <article class="panel-card upload-card">
+              <h3>Ingestion Queue</h3>
+              <form id="knowledge-upload-form" class="stack-form">
+                <input id="knowledge-file-input" class="sr-only-input" type="file" name="file" accept=".pdf,.docx,.txt,.md">
+                <div class="drop-zone" id="knowledge-drop-zone" tabindex="0" role="button" aria-label="Upload knowledge files">
+                <strong>Drop PDF, DOCX, Markdown, TXT</strong>
+                <p>Every uploaded file becomes part of the agent learning pipeline instead of just being stored. Click here or drag a file in.</p>
+                </div>
+                <div class="helper-row">
+                  <button class="secondary-action slim" type="button" id="knowledge-select-button">Choose File</button>
+                  <button class="primary-action slim" type="submit">Upload To Selected Agent</button>
+                  <p class="inline-note" id="knowledge-upload-status">Select an agent first, then upload knowledge directly from this tab.</p>
+                </div>
+              </form>
+              <ul class="progress-list" id="knowledge-doc-list"></ul>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Knowledge Graph Preview</h3>
+                <span class="mono" id="knowledge-graph-label">graph idle</span>
+              </div>
+              <div class="graph-map" id="graph-map"></div>
+              <div class="leaderboard" id="relationship-list"></div>
+            </article>
+          </div>
+
+          <article class="panel-card">
+            <div class="panel-header">
+              <h3>Retrieval Strategy</h3>
+              <span class="status-pill success">Hybrid enabled</span>
+            </div>
+            <div class="rule-grid">
+              <div>
+                <strong>Local-first lookup</strong>
+                <p>The runtime checks the FAISS-backed local knowledge base before any external search work begins.</p>
+              </div>
+              <div>
+                <strong>Freshness trigger</strong>
+                <p>DuckDuckGo search is only triggered for changing facts or weak local retrieval confidence.</p>
+              </div>
+              <div>
+                <strong>Graph-assisted context</strong>
+                <p>Entities and relationships make knowledge feel learned instead of simply appended.</p>
+              </div>
+              <div>
+                <strong>Prompt packing</strong>
+                <p>Only top-ranked chunks are included in prompts to reduce token waste and duplication.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="tab-panel" id="runtime">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Decision Engine</p>
+              <h2>Route requests for safety, speed, and quality.</h2>
+            </div>
+            <span class="status-pill success">Auto-routing on</span>
+          </div>
+
+          <div class="runtime-grid">
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Request Composer</h3>
+                <span class="mono">chat.run()</span>
+              </div>
+              <div class="composer-card">
+                <label>User prompt</label>
+                <p id="runtime-question">No runtime request yet.</p>
+                <label>Selected strategy</label>
+                <p id="runtime-strategy">Local retrieval, optional web grounding, provider routing, and final synthesis will appear here.</p>
+                <label>Answer preview</label>
+                <p id="runtime-answer-preview">Run a chat request to inspect the runtime trace.</p>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Routing Matrix</h3>
+                <span class="status-pill warning">Adaptive</span>
+              </div>
+              <div class="matrix-list" id="runtime-matrix"></div>
+            </article>
+          </div>
+
+          <article class="panel-card">
+            <div class="panel-header">
+              <h3>Safety and Optimization Gates</h3>
+              <span class="mono">runtime notes</span>
+            </div>
+            <div class="gate-list" id="runtime-gates">
+              <div><strong>Prompt budgeter</strong><p>Only the strongest local chunks are passed through to reduce wasted context.</p></div>
+              <div><strong>Provider health monitor</strong><p>Responses are routed only through keys that validated successfully.</p></div>
+              <div><strong>Source verifier</strong><p>Web context is attached with URLs so answers stay grounded and inspectable.</p></div>
+              <div><strong>Data isolation</strong><p>Every agent uses its own documents, messages, and graph state.</p></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="tab-panel" id="usage">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Usage Intelligence</p>
+              <h2>Make optimization visible to the user.</h2>
+            </div>
+            <span class="status-pill success">Metrics live</span>
+          </div>
+
+          <div class="usage-grid">
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Provider Spend Mix</h3>
+                <span class="mono">estimated tokens</span>
+              </div>
+              <div class="bar-stack" id="provider-spend"></div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-header">
+                <h3>Optimization Gains</h3>
+                <span class="status-pill success">Savings tracked</span>
+              </div>
+              <div class="metric-pair">
+                <div>
+                  <span>Token savings</span>
+                  <strong id="metric-token-savings">0%</strong>
+                </div>
+                <div>
+                  <span>Latency reduction</span>
+                  <strong id="metric-latency">0%</strong>
+                </div>
+                <div>
+                  <span>Cached retrieval hits</span>
+                  <strong id="metric-cached-hits">0</strong>
+                </div>
+                <div>
+                  <span>Web-assisted runs</span>
+                  <strong id="metric-web-runs">0</strong>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <article class="panel-card">
+            <div class="panel-header">
+              <h3>Agent Usage Leaderboard</h3>
+              <span class="mono">current session</span>
+            </div>
+            <div class="leaderboard" id="usage-leaderboard"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
